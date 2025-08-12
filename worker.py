@@ -1,8 +1,18 @@
 from openai import OpenAI
 import requests
+import os
+from dotenv import load_dotenv
 
-openai_client = OpenAI()
+# Load environment variables from .env file
+load_dotenv("environment.env")
 
+# Access the API key
+api_key = os.getenv("OPENAI_API_KEY")
+
+if not api_key:
+    raise ValueError("OPENAI_API_KEY not found in environment file")
+
+openai_client = OpenAI(api_key= api_key)
 
 def speech_to_text(audio_binary):
 
@@ -59,15 +69,15 @@ def openai_process_message(user_message):
     # Set the prompt for OpenAI Api
     prompt = "Act like a personal assistant. You can respond to questions, translate sentences, summarize news, and give recommendations."
     # Call the OpenAI Api to process our prompt
-    openai_response = openai_client.chat.completions.create(
-        model="gpt-3.5-turbo", 
-        messages=[
+    openai_response = openai_client.responses.create(
+        model="gpt-4o-mini", 
+        input=[
             {"role": "system", "content": prompt},
             {"role": "user", "content": user_message}
         ],
-        max_tokens=4000
+        max_output_tokens=4000
     )
     print("openai response:", openai_response)
     # Parse the response to get the response message for our prompt
-    response_text = openai_response.choices[0].message.content
+    response_text = openai_response.output[0].content[0].text
     return response_text
